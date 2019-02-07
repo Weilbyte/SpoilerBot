@@ -65,7 +65,36 @@ def whiteList(mode, id, sid):
         conn.close()
         return("Whitelisted user.")
     if (mode == "del"):
-        c.execute('DELETE FROM whitelist WHERE (user=(?) AND serverid=(?))', (id, sid))
+        c.execute('DELETE FROM whitelist WHERE (userid=(?) AND serverid=(?))', (id, sid))
         conn.commit()
         conn.close()
         return "Removed user from whitelist."
+    if (mode == "get"):
+        c.execute("SELECT userid FROM whitelist WHERE serverid = (?)", (sid,))
+        q = c.fetchall()
+        for row in q:
+            if id in row:
+                return("yeet")
+            else:
+                return("yote")
+
+def gameAnswer(mode, ans, sid):
+    output = "NULL"
+    conn = sqlite3.connect(database)
+    c = conn.cursor()
+    if (mode == "get"):
+        c.execute('SELECT answer FROM gameanswer WHERE serverid = (?)', (sid,))
+        q = c.fetchall()
+        for row in q:
+            return str(row).replace("(","").replace(")","").replace(",","").replace("'","") 
+    if (mode == "set"):
+        c.execute('SELECT answer FROM gameanswer WHERE serverid = (?)', (sid,))
+        q = c.fetchall()
+        if len(q)==0:
+            c.execute("Insert into gameanswer (serverid, answer) values (?,?)", (sid, ans))
+            print(f"Added answer {ans} for {sid}")
+        c.execute('UPDATE gameanswer SET answer=? WHERE serverid=?', [ans, sid])
+        conn.commit()
+        conn.close()      
+        print(f"Added answer {ans} for {sid}")
+    return output
